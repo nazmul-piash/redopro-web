@@ -267,7 +267,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (supabase) {
       try {
-        const updateData: any = { status };
+        const updateData: Partial<PickupRequest> = { status };
         if (status === PickupStatus.IN_PROGRESS) {
           updateData.collectorId = currentUser?.id;
         }

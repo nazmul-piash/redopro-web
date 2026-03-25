@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp, AppProvider } from './store';
 import { Role } from './types';
 import { LandingPage } from './components/LandingPage';
-import { UserDashboard, CollectorDashboard, AdminDashboard } from './components/Dashboards';
+import { UserDashboard, CollectorDashboard } from './components/Dashboards';
 import { LogOut, Shield, Info } from 'lucide-react';
 
 const ConfigCheck: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -54,7 +54,7 @@ const MainApp: React.FC = () => {
               <div>
                 <h1 className="text-lg font-black tracking-tighter leading-none">Redo Pro</h1>
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1">
-                  {currentUser.role === Role.USER ? 'Recycler' : currentUser.role} Terminal
+                  {currentUser.role === Role.USER ? 'Recycler' : 'Collector'} Profile
                 </p>
               </div>
             </div>
@@ -71,7 +71,6 @@ const MainApp: React.FC = () => {
         <main className="flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full">
           {currentUser.role === Role.USER && <UserDashboard />}
           {currentUser.role === Role.COLLECTOR && <CollectorDashboard />}
-          {currentUser.role === Role.ADMIN && <AdminDashboard />}
         </main>
       </div>
     </div>

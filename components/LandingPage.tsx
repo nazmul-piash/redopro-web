@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
-  LogIn, User, ShieldCheck, Truck, Search, MapPin, Heart, Share2,
+  LogIn, User, Truck, Search, MapPin, Heart, Share2,
   Cpu, Laptop, Smartphone as Phone, Gamepad2, Headphones, Camera
 } from 'lucide-react';
 import { Role } from '../types';
@@ -278,11 +278,10 @@ export const LandingPage: React.FC = () => {
 
               <div className="space-y-4">
                 <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-4">Select Your Role</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     { id: Role.USER, label: 'User', icon: User },
                     { id: Role.COLLECTOR, label: 'Collector', icon: Truck },
-                    { id: Role.ADMIN, label: 'Admin', icon: ShieldCheck },
                   ].map((r) => (
                     <button
                       key={r.id}

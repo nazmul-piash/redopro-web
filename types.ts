@@ -1,7 +1,6 @@
 export enum Role {
   USER = 'user',
-  COLLECTOR = 'collector',
-  ADMIN = 'admin'
+  COLLECTOR = 'collector'
 }
 
 export enum ItemStatus {
