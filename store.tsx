@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Role, EWasteItem, PickupRequest, ItemStatus, PickupStatus } from './types';
+import { supabase } from './supabase';
 
 interface AppContextType {
   currentUser: User | null;
@@ -96,10 +97,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [remoteItems, setRemoteItems] = useState<EWasteItem[]>([]);
+
   const marketplaceItems = [
     ...MOCK_MARKETPLACE,
+    ...remoteItems.filter(i => i.isPublic),
     ...items.filter(i => i.isPublic)
   ];
+
+  // Fetch from Supabase on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!supabase) return;
+      try {
+        const { data: itemsData, error: itemsError } = await supabase
+          .from('items')
+          .select('*')
+          .order('createdAt', { ascending: false });
+
+        if (!itemsError && itemsData) {
+          setRemoteItems(itemsData as EWasteItem[]);
+        }
+
+        const { data: pickupsData, error: pickupsError } = await supabase
+          .from('pickups')
+          .select('*')
+          .order('createdAt', { ascending: false });
+
+        if (!pickupsError && pickupsData) {
+          setPickups(pickupsData as PickupRequest[]);
+        }
+      } catch (err) {
+        console.error('Error fetching from Supabase:', err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('redo_user', JSON.stringify(currentUser));
@@ -126,7 +160,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(null);
   };
 
-  const addItem = (item: Omit<EWasteItem, 'id' | 'createdAt' | 'status'>) => {
+  const addItem = async (item: Omit<EWasteItem, 'id' | 'createdAt' | 'status'>) => {
     const newItem: EWasteItem = {
       ...item,
       id: Math.random().toString(36).substr(2, 9),
@@ -135,23 +169,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isPublic: item.isPublic || false,
       location: item.location || undefined
     };
+
+    // Save locally
     setItems(prev => [newItem, ...prev]);
+
+    // Save to Supabase
+    if (supabase) {
+      try {
+        await supabase.from('items').insert([newItem]);
+      } catch (err) {
+        console.error('Error saving to Supabase:', err);
+      }
+    }
   };
 
-  const deleteItem = (id: string) => {
+  const deleteItem = async (id: string) => {
     setItems(prev => prev.filter(i => i.id !== id));
+    
+    if (supabase) {
+      try {
+        await supabase.from('items').delete().eq('id', id);
+      } catch (err) {
+        console.error('Error deleting from Supabase:', err);
+      }
+    }
   };
 
-  const publishToMarketplace = (id: string, tokenValue: number) => {
-    setItems(prev => prev.map(i => i.id === id ? { 
+  const publishToMarketplace = async (id: string, tokenValue: number) => {
+    const updatedItems = items.map(i => i.id === id ? { 
       ...i, 
       isPublic: true, 
       tokenValue,
       location: { lat: 37.7749, lng: -122.4194, city: 'San Francisco' } // Mock location
-    } : i));
+    } : i);
+    
+    setItems(updatedItems);
+
+    if (supabase) {
+      try {
+        await supabase.from('items').update({ 
+          isPublic: true, 
+          tokenValue,
+          location: { lat: 37.7749, lng: -122.4194, city: 'San Francisco' }
+        }).eq('id', id);
+      } catch (err) {
+        console.error('Error updating marketplace status in Supabase:', err);
+      }
+    }
   };
 
-  const requestPickup = (itemIds: string[], address: string, lat: number, lng: number) => {
+  const requestPickup = async (itemIds: string[], address: string, lat: number, lng: number) => {
     const selectedItems = items.filter(i => itemIds.includes(i.id));
     const totalPoints = selectedItems.reduce((acc, curr) => acc + curr.estimatedPoints, 0);
 
@@ -167,9 +234,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setPickups(prev => [newPickup, ...prev]);
     setItems(prev => prev.map(i => itemIds.includes(i.id) ? { ...i, status: ItemStatus.PICKUP_REQUESTED } : i));
+
+    if (supabase) {
+      try {
+        await supabase.from('pickups').insert([newPickup]);
+        // Update items status in Supabase too
+        for (const itemId of itemIds) {
+          await supabase.from('items').update({ status: ItemStatus.PICKUP_REQUESTED }).eq('id', itemId);
+        }
+      } catch (err) {
+        console.error('Error saving pickup to Supabase:', err);
+      }
+    }
   };
 
-  const updatePickupStatus = (id: string, status: PickupStatus) => {
+  const updatePickupStatus = async (id: string, status: PickupStatus) => {
     setPickups(prev => prev.map(p => {
       if (p.id === id) {
         const updated = { ...p, status, collectorId: status === PickupStatus.IN_PROGRESS ? currentUser?.id : p.collectorId };
@@ -185,6 +264,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return p;
     }));
+
+    if (supabase) {
+      try {
+        const updateData: any = { status };
+        if (status === PickupStatus.IN_PROGRESS) {
+          updateData.collectorId = currentUser?.id;
+        }
+        await supabase.from('pickups').update(updateData).eq('id', id);
+
+        if (status === PickupStatus.COMPLETED) {
+          const pickup = pickups.find(p => p.id === id);
+          if (pickup) {
+            for (const itemId of pickup.itemIds) {
+              await supabase.from('items').update({ status: ItemStatus.COMPLETED }).eq('id', itemId);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error updating pickup status in Supabase:', err);
+      }
+    }
   };
 
   return (
