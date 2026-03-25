@@ -1,0 +1,9 @@
+{
+  "appId": "com.redopro.app",
+  "appName": "Redo Pro",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

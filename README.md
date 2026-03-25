@@ -1,11 +1,15 @@
-<div align="center">
+# Redo Pro: AI E-Waste Recycling
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Redo Pro is a high-performance, AI-driven mobile application designed to manage electronic waste recycling through neural classification and optimized logistics.
 
-  <h1>Built with AI Studio</h2>
+## 📱 Mobile Deployment
+This project is built using **React**, **TypeScript**, and **Vite**, and is wrapped into a native mobile application using **Capacitor**. To install this on a physical device, please refer to the following documentation:
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+1. **[NATIVE_BUILD_GUIDE.md](./NATIVE_BUILD_GUIDE.md)**: Technical instructions for developers using Android Studio or Xcode.
+2. **[APP_INSTALLATION_HUB.md](./APP_INSTALLATION_HUB.md)**: User-facing guide with download links and QR codes.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+## 🚀 Quick Commands
+- `npm install`: Install dependencies.
+- `npm run build`: Compile the web application.
+- `npx cap sync`: Transfer the web build to Android/iOS folders.
+- `npx cap open android`: Launch Android Studio.

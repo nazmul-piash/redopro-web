@@ -1,0 +1,8 @@
+{
+  "name": "Redo Pro web site ",
+  "description": "AI-Powered E-Waste Recycling & Pickup Management Marketplace",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

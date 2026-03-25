@@ -1,0 +1,22 @@
+
+{
+  "short_name": "Redo Pro",
+  "name": "Redo Pro: AI E-Waste Recycling",
+  "icons": [
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=redo-pro-icon&backgroundColor=059669",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=redo-pro-icon&backgroundColor=059669",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#059669",
+  "background_color": "#f8fafc",
+  "orientation": "portrait"
+}
